@@ -1,0 +1,65 @@
+// COMP30019 - Graphics and Interaction
+// (c) University of Melbourne, 2023
+
+using System;
+using System.Linq;
+using System.Reflection;
+using System.Collections.Generic;
+
+using UnityEngine;
+
+public class ShaderEffectsManager : MonoBehaviour
+{
+    [SerializeField] private GameTime _gameTime;
+    
+    private static ShaderEffectsManager _instance;
+    private static List<Type> _shaderEffects;
+
+    private void Start()
+    {
+        // Can't have more than one shader effects manager.
+        if (_instance != null)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        _instance = this;
+
+        // By reflection find all classes that implement the IGlobalShaderEffect
+        // interface and add them to the list of shader effects.
+        _shaderEffects = new List<Type>();
+        foreach (Type type in Assembly.GetExecutingAssembly().GetTypes())
+        {
+            if (type.GetInterfaces().Contains(typeof(IGlobalShaderEffect)))
+                _shaderEffects.Add(type);
+        }
+
+        InitializeAllShaderEffects();
+    }
+
+    private void InitializeAllShaderEffects()
+    {
+        foreach (Type type in _shaderEffects)
+        {
+            MethodInfo method = type.GetMethod("InitializeShaderEffect");
+            method?.Invoke(null, null);
+        }
+    }
+
+    private void UpdateAllShaderEffects()
+    {
+        foreach (Type type in _shaderEffects)
+        {
+            MethodInfo method = type.GetMethod("UpdateShaderEffect");
+            method?.Invoke(null, null);
+        }
+    }
+
+    private void Update()
+    {
+        // Update shader time variable to keep shader effects in sync.
+        Shader.SetGlobalFloat("_GameTime", _gameTime.Time);
+
+        UpdateAllShaderEffects();
+    }
+}
