@@ -23,6 +23,13 @@ public class ShaderEffectsManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
+        DontDestroyOnLoad(gameObject);
+
+        // Similar to the ViewportManager, we are using a singleton pattern to
+        // reflect the fact that there is only ever one shader effects manager
+        // in the scene (and enforce this). Given that custom shaders are used
+        // in all scenes, this is necessary to ensure that the shader effects
+        // are kept in sync and initialised from the start of the game.
         _instance = this;
 
         // By reflection find all classes that implement the IGlobalShaderEffect

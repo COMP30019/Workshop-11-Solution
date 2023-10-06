@@ -24,6 +24,10 @@ public class PlayerController : MonoBehaviour
 
     private void Start()
     {
+        // Use the viewport camera the main camera if one isn't assigned.
+        if (this.playerCamera == null)
+            this.playerCamera = ViewportManager.Camera;
+
         this._rigidbody = GetComponent<Rigidbody>();
         this._moveDirection = Vector3.zero;
         this._aimDirection = Vector3.forward;
